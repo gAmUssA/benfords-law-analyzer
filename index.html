@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Benford's Law Analyzer</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <!-- Dark Mode Toggle -->
+    <div class="fixed top-4 right-4 z-50">
+        <button id="darkModeToggle" class="p-2 rounded-lg bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300">
+            <span class="dark:hidden">🌙</span>
+            <span class="hidden dark:inline">☀️</span>
+        </button>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">
+                📊 Benford's Law Analyzer
+            </h1>
+            <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                Upload numerical data or generate test data to analyze first-digit distribution patterns according to Benford's Law
+            </p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Input Panel -->
+            <div class="lg:col-span-1">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">📥 Data Input</h2>
+                    
+                    <!-- File Upload -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Upload CSV File (max 1MB)
+                        </label>
+                        <input type="file" id="fileInput" accept=".csv" 
+                               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    </div>
+
+                    <!-- Column Selection (hidden by default) -->
+                    <div id="columnSelection" class="mb-6 hidden">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Select Column to Analyze
+                        </label>
+                        <select id="columnSelect" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </select>
+                    </div>
+
+                    <!-- Text Input -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Or Paste Numbers (comma, tab, or newline separated)
+                        </label>
+                        <textarea id="textInput" rows="6" placeholder="123, 456, 789&#10;or one number per line"
+                                  class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"></textarea>
+                    </div>
+
+                    <!-- Anomaly Threshold -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Anomaly Threshold (%)
+                        </label>
+                        <input type="number" id="thresholdInput" value="5" min="1" max="50" 
+                               class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="space-y-3">
+                        <button id="analyzeBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200">
+                            🔍 Analyze Data
+                        </button>
+                        <button id="clearBtn" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200">
+                            🗑️ Clear All
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Advanced Analytics -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6 hidden" id="advancedAnalytics">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">🔍 Advanced Analytics</h2>
+                    
+                    <!-- Digit Analysis Heatmap -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-3">Digit Deviation Heatmap</h3>
+                        <div id="digitHeatmap" class="grid grid-cols-9 gap-1 max-w-md">
+                            <!-- Heatmap cells will be populated here -->
+                        </div>
+                        <div class="flex items-center justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            <span>Low Deviation</span>
+                            <span>High Deviation</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Key Metrics -->
+                    <div class="grid md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400" id="maxDeviation">-</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-300">Max Deviation</div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-green-600 dark:text-green-400" id="avgDeviation">-</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-300">Avg Deviation</div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-purple-600 dark:text-purple-400" id="conformityScore">-</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-300">Conformity Score</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistical Tests -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6 hidden" id="statisticalTests">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white">📊 Statistical Tests</h2>
+                        <button id="explainerBtn" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded-md transition-colors duration-200">
+                            ❓ Learn More
+                        </button>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Chi-Squared Test -->
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-3">χ² (Chi-Squared) Test</h3>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-300">Test Statistic:</span>
+                                    <span id="chiSquaredValue" class="font-mono text-gray-800 dark:text-white">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-300">Degrees of Freedom:</span>
+                                    <span id="chiSquaredDf" class="font-mono text-gray-800 dark:text-white">8</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-300">P-Value:</span>
+                                    <span id="chiSquaredPValue" class="font-mono text-gray-800 dark:text-white">-</span>
+                                </div>
+                                <div class="mt-3 p-2 rounded" id="chiSquaredResult">
+                                    <p id="chiSquaredInterpretation" class="text-sm">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- MAD Test -->
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-3">MAD (Mean Absolute Deviation)</h3>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-300">MAD Value:</span>
+                                    <span id="madValue" class="font-mono text-gray-800 dark:text-white">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-300">Conformity Level:</span>
+                                    <span id="madConformity" class="font-semibold">-</span>
+                                </div>
+                                <div class="mt-3 p-2 rounded" id="madResult">
+                                    <p id="madInterpretation" class="text-sm">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Generator -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mt-6">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">🎲 Generate Test Data</h2>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Number of Records
+                        </label>
+                        <input type="number" id="recordCount" value="500" min="10" max="10000" 
+                               class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Number Type
+                        </label>
+                        <select id="numberType" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            <option value="integer">Positive Integers</option>
+                            <option value="currency">Currency Style</option>
+                            <option value="decimal">Decimal (2 places)</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button id="generateBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200">
+                            🎲 Generate Data
+                        </button>
+                        <button id="downloadBtn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 hidden">
+                            💾 Download CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="lg:col-span-2">
+                <!-- Chart -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white">📈 Distribution Comparison</h2>
+                        <div class="flex space-x-2">
+                            <button id="barChartBtn" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded-md transition-colors duration-200 active">
+                                Bar Chart
+                            </button>
+                            <button id="cumulativeChartBtn" class="bg-gray-400 hover:bg-gray-500 text-white text-sm px-3 py-1 rounded-md transition-colors duration-200">
+                                Cumulative
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container" style="position: relative; height: 400px;">
+                        <canvas id="benfordChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Results Table -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white">📋 Analysis Results</h2>
+                        <button id="exportBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 hidden">
+                            📤 Export Results
+                        </button>
+                    </div>
+                    <div id="resultsTable" class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Digit</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Count</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Observed %</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Expected %</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Difference</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                <tr>
+                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                                        Upload or paste data to see analysis results
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Anomaly Alert -->
+                <div id="anomalyAlert" class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6 hidden">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-3">🚨</span>
+                        <div>
+                            <h3 class="text-lg font-semibold text-yellow-800 dark:text-yellow-200">Possible Anomaly Detected</h3>
+                            <p class="text-yellow-700 dark:text-yellow-300" id="anomalyMessage"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Panel -->
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-2">ℹ️ About Benford's Law</h3>
+                    <p class="text-blue-700 dark:text-blue-300 text-sm">
+                        Benford's Law states that in many naturally occurring datasets, the first digit follows a logarithmic distribution. 
+                        The digit 1 appears about 30.1% of the time, while 9 appears only 4.6% of the time. 
+                        Significant deviations may indicate data manipulation or non-natural datasets.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

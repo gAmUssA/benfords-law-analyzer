@@ -1,0 +1,22 @@
+{
+  "name": "benfords-law-analyzer",
+  "version": "1.0.0",
+  "description": "A web-based tool to analyze numerical data against Benford's Law distribution",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "build": "echo 'Static site - no build required'",
+    "dev": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "benfords-law",
+    "data-analysis",
+    "statistics",
+    "visualization",
+    "fraud-detection"
+  ],
+  "author": "Cascade AI",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
