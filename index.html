@@ -275,6 +275,71 @@
         </div>
     </div>
 
+    <!-- Explainer Modal -->
+    <div id="explainerModal" class="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">📊 Understanding Benford's Law</h2>
+                    <button id="closeExplainerBtn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="prose dark:prose-invert max-w-none">
+                    <h3>What is Benford's Law?</h3>
+                    <p>
+                        Benford's Law, also called the First-Digit Law, is a mathematical phenomenon where in many naturally occurring collections of numbers, the leading digit is likely to be small. Specifically, the digit 1 appears as the leading significant digit about 30% of the time, while 9 appears as the leading significant digit less than 5% of the time.
+                    </p>
+                    
+                    <h3>The Expected Distribution</h3>
+                    <p>
+                        According to Benford's Law, the probability of a number having a first digit d (where d is 1 through 9) is:
+                        <br>
+                        <code>P(d) = log<sub>10</sub>(1 + 1/d)</code>
+                    </p>
+                    
+                    <h3>Statistical Tests</h3>
+                    <p>
+                        <strong>Chi-Squared Test:</strong> Measures how well the observed distribution matches the expected Benford distribution. Lower values indicate better conformity.
+                    </p>
+                    <p>
+                        <strong>Mean Absolute Deviation (MAD):</strong> Calculates the average absolute difference between observed and expected percentages. According to Nigrini's guidelines:
+                    </p>
+                    <ul>
+                        <li>MAD < 0.006: High conformity to Benford's Law</li>
+                        <li>0.006 ≤ MAD < 0.012: Moderate conformity</li>
+                        <li>0.012 ≤ MAD < 0.015: Marginal conformity</li>
+                        <li>MAD ≥ 0.015: Non-conformity</li>
+                    </ul>
+                    
+                    <h3>Applications</h3>
+                    <p>
+                        Benford's Law is used in various fields including:
+                    </p>
+                    <ul>
+                        <li>Fraud detection in financial data</li>
+                        <li>Election result analysis</li>
+                        <li>Scientific data validation</li>
+                        <li>Computer storage optimization</li>
+                    </ul>
+                    
+                    <h3>Limitations</h3>
+                    <p>
+                        Benford's Law doesn't apply to all datasets. It works best with data that:
+                    </p>
+                    <ul>
+                        <li>Spans multiple orders of magnitude</li>
+                        <li>Is not artificially constrained (like assigned numbers)</li>
+                        <li>Has a sufficient sample size (generally >100 values)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
